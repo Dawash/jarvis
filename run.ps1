@@ -25,6 +25,21 @@ if (-not $python) {
 
 Write-Host "[*] Using: $python" -ForegroundColor Green
 
+# Check Python version (3.11-3.13 required)
+$pyVersion = & $python -c "import sys; print(f'{sys.version_info.minor}')" 2>$null
+$pyMinor = [int]$pyVersion
+if ($pyMinor -lt 11) {
+    Write-Host "[ERROR] Python 3.11+ is required. You have Python 3.$pyMinor" -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    exit 1
+}
+if ($pyMinor -gt 13) {
+    Write-Host "[ERROR] Python 3.14+ is not yet supported (pydantic-core has no wheels)." -ForegroundColor Red
+    Write-Host "[ERROR] Please install Python 3.12 or 3.13 from https://python.org" -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    exit 1
+}
+
 # Create venv if needed
 if (-not (Test-Path "venv")) {
     Write-Host "[*] Creating virtual environment..." -ForegroundColor Yellow
