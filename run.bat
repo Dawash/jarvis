@@ -10,42 +10,65 @@ echo.
 
 cd /d "%~dp0"
 
-:: Check Python
-where python >nul 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo [ERROR] Python is required. Install from https://python.org
+:: Find a compatible Python (3.11, 3.12, or 3.13)
+set PYTHON=
+set PYVER=
+
+:: Try py launcher first (preferred on Windows)
+where py >nul 2>&1
+if %ERRORLEVEL% equ 0 (
+    for %%V in (3.13 3.12 3.11) do (
+        if not defined PYTHON (
+            py -%%V --version >nul 2>&1
+            if not errorlevel 1 (
+                set PYTHON=py -%%V
+                for /f "tokens=2 delims= " %%r in ('py -%%V --version 2^>^&1') do set PYVER=%%r
+            )
+        )
+    )
+)
+
+:: Try versioned executables on PATH
+if not defined PYTHON (
+    for %%V in (3.13 3.12 3.11) do (
+        if not defined PYTHON (
+            where python%%V >nul 2>&1
+            if not errorlevel 1 (
+                set PYTHON=python%%V
+                for /f "tokens=2 delims= " %%r in ('python%%V --version 2^>^&1') do set PYVER=%%r
+            )
+        )
+    )
+)
+
+:: Fall back to default python if it's a compatible version
+if not defined PYTHON (
+    where python >nul 2>&1
+    if %ERRORLEVEL% neq 0 (
+        echo [ERROR] Python is required. Install from https://python.org
+        pause
+        exit /b 1
+    )
+    for /f "tokens=2 delims= " %%v in ('python --version 2^>^&1') do set PYVER=%%v
+    for /f "tokens=1,2 delims=." %%a in ("%PYVER%") do (
+        if %%a equ 3 if %%b geq 11 if %%b leq 13 set PYTHON=python
+    )
+)
+
+if not defined PYTHON (
+    echo [ERROR] Python 3.11-3.13 is required but not found.
+    echo [ERROR] Default python is %PYVER%
+    echo [ERROR] Install Python 3.12 or 3.13 from https://python.org
     pause
     exit /b 1
 )
 
-:: Check Python version (need 3.11 or 3.12 or 3.13)
-for /f "tokens=2 delims= " %%v in ('python --version 2^>^&1') do set PYVER=%%v
-for /f "tokens=1,2 delims=." %%a in ("%PYVER%") do (
-    set PYMAJOR=%%a
-    set PYMINOR=%%b
-)
-if %PYMAJOR% neq 3 (
-    echo [ERROR] Python 3.11-3.13 is required. You have Python %PYVER%
-    pause
-    exit /b 1
-)
-if %PYMINOR% gtr 13 (
-    echo [ERROR] Python 3.14+ is not yet supported. You have Python %PYVER%
-    echo [ERROR] Please install Python 3.12 or 3.13 from https://python.org
-    echo [ERROR] Make sure the older Python is first on your PATH.
-    pause
-    exit /b 1
-)
-if %PYMINOR% lss 11 (
-    echo [ERROR] Python 3.11+ is required. You have Python %PYVER%
-    pause
-    exit /b 1
-)
+echo [*] Using %PYTHON% (Python %PYVER%)
 
 :: Create venv if needed
 if not exist "venv" (
     echo [*] Creating virtual environment...
-    python -m venv venv
+    %PYTHON% -m venv venv
 )
 
 :: Activate venv
