@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS — Personal AI Assistant</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">J</div>
+                    <span class="logo-text">JARVIS</span>
+                </div>
+                <button id="new-chat-btn" title="New Chat">+</button>
+            </div>
+            <div class="sidebar-section">
+                <h3>Active Agents</h3>
+                <div id="agent-list" class="agent-list">
+                    <div class="empty-state">No active agents</div>
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <h3>Memory</h3>
+                <div id="memory-list" class="memory-list">
+                    <div class="empty-state">No memories yet</div>
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <h3>Evolution</h3>
+                <div id="evolution-stats" class="evolution-stats">
+                    <div class="empty-state">Learning...</div>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="dot" id="connection-dot"></span>
+                    <span id="connection-status">Connecting...</span>
+                </div>
+                <button id="settings-btn" class="settings-btn" title="Settings &amp; API Keys">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main id="main">
+            <div id="chat-container">
+                <div id="messages" class="messages">
+                    <div class="welcome-message">
+                        <div class="welcome-icon">J</div>
+                        <h1>Hello, I'm JARVIS</h1>
+                        <p>Your personal AI assistant with full system control. I can execute commands, browse the web, write code, manage files, and spawn multiple agents to work in parallel.</p>
+                        <div class="capabilities">
+                            <div class="cap-card" onclick="sendQuick('What\'s the current system status? Show CPU, memory, and disk usage.')">
+                                <span class="cap-icon">&#9881;</span>
+                                <span>System Control</span>
+                            </div>
+                            <div class="cap-card" onclick="sendQuick('Search the web for the latest AI news and summarize the top 3 stories.')">
+                                <span class="cap-icon">&#127760;</span>
+                                <span>Web Search</span>
+                            </div>
+                            <div class="cap-card" onclick="sendQuick('Write a Python script that monitors my system resources and creates a dashboard.')">
+                                <span class="cap-icon">&#128187;</span>
+                                <span>Write Code</span>
+                            </div>
+                            <div class="cap-card" onclick="sendQuick('List all files in my home directory and tell me what\'s taking the most space.')">
+                                <span class="cap-icon">&#128193;</span>
+                                <span>File Management</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div id="input-area">
+                <!-- Attachment preview -->
+                <div id="attachment-preview" class="attachment-preview hidden">
+                    <div id="attachment-items"></div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-actions-left">
+                        <button id="upload-btn" class="icon-btn" title="Upload files">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        </button>
+                        <button id="link-btn" class="icon-btn" title="Add a link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        </button>
+                        <button id="folder-btn" class="icon-btn" title="Select folder">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="input-wrapper">
+                        <textarea id="message-input" placeholder="Ask JARVIS anything..." rows="1"></textarea>
+                    </div>
+
+                    <div class="input-actions-right">
+                        <button id="voice-btn" class="icon-btn voice-btn" title="Voice mode (hold to talk)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                        </button>
+                        <button id="send-btn" class="icon-btn send-btn" title="Send message">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="input-footer">
+                    <span class="hint">Press Enter to send, Shift+Enter for new line</span>
+                    <span id="typing-indicator" class="typing-indicator hidden">JARVIS is thinking...</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Drop overlay -->
+        <div id="drop-overlay" class="drop-overlay hidden">
+            <div class="drop-content">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p>Drop files here</p>
+            </div>
+        </div>
+
+        <!-- Setup Screen (shown when no API key) -->
+        <div id="setup-screen" class="setup-screen hidden">
+            <div class="setup-card">
+                <div class="setup-logo">
+                    <div class="logo-icon" style="width:64px;height:64px;font-size:28px;border-radius:18px;">J</div>
+                </div>
+                <h1>Welcome to JARVIS</h1>
+                <p class="setup-subtitle">Enter your API key to get started. Your key is stored locally on this machine and never sent anywhere except the provider's API.</p>
+
+                <div class="setup-form">
+                    <div class="key-input-group">
+                        <label for="setup-anthropic-key">
+                            Anthropic API Key <span class="required">*required</span>
+                        </label>
+                        <div class="key-input-row">
+                            <input type="password" id="setup-anthropic-key" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+                            <button class="toggle-vis-btn" data-target="setup-anthropic-key" title="Toggle visibility">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                        <span class="key-hint">Get yours at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a></span>
+                    </div>
+
+                    <div class="key-input-group">
+                        <label for="setup-openai-key">
+                            OpenAI API Key <span class="optional">optional &mdash; for voice</span>
+                        </label>
+                        <div class="key-input-row">
+                            <input type="password" id="setup-openai-key" placeholder="sk-..." autocomplete="off" spellcheck="false">
+                            <button class="toggle-vis-btn" data-target="setup-openai-key" title="Toggle visibility">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                        <span class="key-hint">Needed for Whisper voice-to-text. Chat works without this.</span>
+                    </div>
+
+                    <div id="setup-error" class="setup-error hidden"></div>
+                    <div id="setup-validating" class="setup-validating hidden">
+                        <span class="spinner"></span> Validating key...
+                    </div>
+
+                    <button id="setup-save-btn" class="setup-save-btn">
+                        Start Using JARVIS
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button id="modal-close-btn" class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <h3>API Keys</h3>
+                    <p class="modal-hint">Keys are saved locally. Only sent to the respective API provider.</p>
+
+                    <div class="key-input-group">
+                        <label for="modal-anthropic-key">Anthropic API Key</label>
+                        <div class="key-input-row">
+                            <input type="password" id="modal-anthropic-key" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+                            <button class="toggle-vis-btn" data-target="modal-anthropic-key" title="Toggle visibility">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                        <div id="modal-anthropic-status" class="key-status"></div>
+                    </div>
+
+                    <div class="key-input-group">
+                        <label for="modal-openai-key">OpenAI API Key</label>
+                        <div class="key-input-row">
+                            <input type="password" id="modal-openai-key" placeholder="sk-..." autocomplete="off" spellcheck="false">
+                            <button class="toggle-vis-btn" data-target="modal-openai-key" title="Toggle visibility">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                        <div id="modal-openai-status" class="key-status"></div>
+                    </div>
+
+                    <div id="modal-error" class="setup-error hidden"></div>
+                    <div id="modal-validating" class="setup-validating hidden">
+                        <span class="spinner"></span> Validating...
+                    </div>
+
+                    <div class="modal-actions">
+                        <button id="modal-save-btn" class="setup-save-btn">Save Keys</button>
+                        <button id="modal-clear-btn" class="modal-clear-btn">Clear All Keys</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file inputs -->
+    <input type="file" id="file-input" multiple hidden>
+    <input type="file" id="folder-input" webkitdirectory hidden>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
