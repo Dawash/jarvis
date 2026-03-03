@@ -1,14 +1,13 @@
 @echo off
-chcp 65001 >nul 2>&1
 title JARVIS - Personal AI Assistant
 
 echo.
-echo      ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗
-echo      ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝
-echo      ██║███████║██████╔╝██║   ██║██║███████╗
-echo ██   ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║
-echo ╚█████╔╝██║  ██║██║  ██║ ╚████╔╝ ██║███████║
-echo  ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝
+echo       _ ___  ______  _   _ _ ____
+echo      | / _ \^|  _ \ \^| ^| ^| ^| / ___|
+echo      ^| ^| ^| ^| ^| ^|_) ^| ^| ^| ^| \___ \
+echo  _   ^| ^| ^|_^| ^|  _ ^(^| ^|_^| ^| ^|___) ^|
+echo ^| ^|__^| \___/^|_^| \_\\___/^|_^|____/
+echo  \____/
 echo.
 echo    Personal AI Assistant
 echo.
@@ -19,6 +18,30 @@ cd /d "%~dp0"
 where python >nul 2>&1
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] Python is required. Install from https://python.org
+    pause
+    exit /b 1
+)
+
+:: Check Python version (need 3.11 or 3.12 or 3.13)
+for /f "tokens=2 delims= " %%v in ('python --version 2^>^&1') do set PYVER=%%v
+for /f "tokens=1,2 delims=." %%a in ("%PYVER%") do (
+    set PYMAJOR=%%a
+    set PYMINOR=%%b
+)
+if %PYMAJOR% neq 3 (
+    echo [ERROR] Python 3.11-3.13 is required. You have Python %PYVER%
+    pause
+    exit /b 1
+)
+if %PYMINOR% gtr 13 (
+    echo [ERROR] Python 3.14+ is not yet supported. You have Python %PYVER%
+    echo [ERROR] Please install Python 3.12 or 3.13 from https://python.org
+    echo [ERROR] Make sure the older Python is first on your PATH.
+    pause
+    exit /b 1
+)
+if %PYMINOR% lss 11 (
+    echo [ERROR] Python 3.11+ is required. You have Python %PYVER%
     pause
     exit /b 1
 )
