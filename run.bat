@@ -2,14 +2,10 @@
 title JARVIS - Personal AI Assistant
 
 echo.
-echo       _ ___  ______  _   _ _ ____
-echo      | / _ \^|  _ \ \^| ^| ^| ^| / ___|
-echo      ^| ^| ^| ^| ^| ^|_) ^| ^| ^| ^| \___ \
-echo  _   ^| ^| ^|_^| ^|  _ ^(^| ^|_^| ^| ^|___) ^|
-echo ^| ^|__^| \___/^|_^| \_\\___/^|_^|____/
-echo  \____/
-echo.
-echo    Personal AI Assistant
+echo   ============================================
+echo        J A R V I S
+echo        Personal AI Assistant
+echo   ============================================
 echo.
 
 cd /d "%~dp0"
